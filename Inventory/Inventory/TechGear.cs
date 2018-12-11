@@ -8,7 +8,7 @@ namespace Inventory
     {
         public bool Battery { get; set; }
 
-        public TechGear(string serialNumber, string description, DateTime dateOfAquiring, int warranty, double price, string seller, bool battery)
+        public TechGear(int serialNumber, string description, DateTime dateOfAquiring, int warranty, double price, string seller, bool battery)
             : base(serialNumber, description, dateOfAquiring, warranty, price, seller)
         {
             Battery = battery;

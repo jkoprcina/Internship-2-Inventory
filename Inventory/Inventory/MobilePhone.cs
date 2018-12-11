@@ -10,7 +10,7 @@ namespace Inventory
         public string PhoneNumber { get; set; }
         public string Owner { get; set; }
 
-        public MobilePhone(string serialNumber, string description, DateTime dateOfAquiring, int warranty, double price, string seller, bool battery, string phoneNumber, string owner)
+        public MobilePhone(int serialNumber, string description, DateTime dateOfAquiring, int warranty, double price, string seller, bool battery, string phoneNumber, string owner)
             : base(serialNumber, description, dateOfAquiring, warranty, price, seller, battery)
         {
             PhoneNumber = phoneNumber;

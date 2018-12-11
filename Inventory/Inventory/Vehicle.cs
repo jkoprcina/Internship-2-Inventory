@@ -9,7 +9,7 @@ namespace Inventory
         public DateTime WarrantyExpirationDate { get; set; }
         public double Mileage { get; set; }
 
-        public Vehicle(string serialNumber, string description, DateTime dateOfAquiring, int warranty, double price, string seller, DateTime warrantyExpirationDate, double mileage)
+        public Vehicle(int serialNumber, string description, DateTime dateOfAquiring, int warranty, double price, string seller, DateTime warrantyExpirationDate, double mileage)
             :base(serialNumber, description, dateOfAquiring, warranty, price, seller)
         {
             WarrantyExpirationDate = warrantyExpirationDate;
