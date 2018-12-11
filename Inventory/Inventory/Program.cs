@@ -10,8 +10,8 @@ namespace Inventory
         }
         static void Main(string[] args)
         {
-            var Phones = new List<MobilePhone>();
             var Vehicles = new List<Vehicle>();
+            var Phones = new List<MobilePhone>();
             var Computers = new List<Computer>();
             var choice = 0;
 
@@ -34,10 +34,14 @@ namespace Inventory
                 {
                     case 1:
                         Console.WriteLine("Please enter the serial number of the item you'd like to see");
+                        var specificItem = int.Parse(Console.ReadLine());
+                        Console.WriteLine(OutputForACertainItem(specificItem, Vehicles, Phones, Computers));
                         break;
                     case 2:
                         break;
                     case 3:
+                        var numberOfBatteries = NumberOfTechGearWithBattery(Phones, Computers);
+                        Console.WriteLine("The number of batteries in use is {0}", numberOfBatteries);
                         break;
                     case 4:
                         break;
@@ -50,8 +54,51 @@ namespace Inventory
                 }
             } while (choice > 0 && choice < 8);
             Console.WriteLine("Have a nice day!");
+            Console.ReadKey();
         }
-        
+
+        //Methods for the main menu
+
+        //Method to show the user a certain item he requested through the input of it's serial number
+        static string OutputForACertainItem(int number, List<Vehicle> vehicles, List<MobilePhone> phones, List<Computer> computers)
+        {
+            foreach (Vehicle v in vehicles)
+            {
+                if (v.SerialNumber == number)
+                    return (v.SerialNumber + " " + v.Description + " " + v.Seller);
+            }
+            foreach (MobilePhone p in phones)
+            {
+                if (p.SerialNumber == number)
+                    return (p.SerialNumber + " " + p.Description + " " + p.Seller);
+            }
+            foreach (Computer c in computers)
+            {
+                if (c.SerialNumber == number)
+                    return (c.SerialNumber + " " + c.Description + " " + c.Seller);
+            }
+            return "The id does not exist";
+        }
+
+        static int NumberOfTechGearWithBattery(List<MobilePhone> phones, List<Computer> computers)
+        {
+            var batteryCounter = 0;
+
+            foreach (MobilePhone p in phones)
+            {
+                if (p.Battery)
+                    batteryCounter++;
+            }
+            foreach (Computer c in computers)
+            {
+                if (c.Battery)
+                    batteryCounter++;
+            }
+
+            return batteryCounter;
+        }
+
+        //Creating dummy objects for easier testing of aplication
         static List<Vehicle> PreliminaryInputVehicles()
         {
             var listOfVehicles = new List<Vehicle>();
@@ -89,7 +136,7 @@ namespace Inventory
         {
             var listOfPhones = new List<MobilePhone>();
 
-            var descriptionsOfPhones = new string[4] { "Good", "A firetruck", "A lamborgini ( boss's car)", "Run down" };
+            var descriptionsOfPhones = new string[4] { "Old", "Bad touchscreen", "A iphone X ( boss's phone)", "Barely working" };
             var dateOfAquiringOfPhones = new DateTime[4]
             {
                 new DateTime(2011, 11, 1),
@@ -117,7 +164,7 @@ namespace Inventory
         {
             var listOfComputers = new List<Computer>();
 
-            var descriptionsOfComputers = new string[4] { "Good", "A firetruck", "A lamborgini ( boss's car)", "Run down" };
+            var descriptionsOfComputers = new string[4] { "Gaming computer", "For writing code", "A mac ( boss's laptop)", "New" };
             var dateOfAquiringOfComputers = new DateTime[4]
                 {
                 new DateTime(2015, 11, 9),
@@ -142,6 +189,8 @@ namespace Inventory
             return listOfComputers;
         }
 
+
+        //creating enums for sellers
         public enum ComputerCompanies
         {
             Dell = 1,
