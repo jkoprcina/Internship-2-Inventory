@@ -10,56 +10,131 @@ namespace Inventory
         }
         static void Main(string[] args)
         {
-            var Vehicles = new List<Vehicle>();
-            var Phones = new List<MobilePhone>();
-            var Computers = new List<Computer>();
+            var vehicles = new List<Vehicle>();
+            var phones = new List<MobilePhone>();
+            var computers = new List<Computer>();
             var choice = 0;
 
-            Vehicles = PreliminaryInputVehicles();
-            Phones = PreliminaryInputPhones();
-            Computers = PreliminaryInputComputers();
+            vehicles = PreliminaryInputVehicles();
+            phones = PreliminaryInputPhones();
+            computers = PreliminaryInputComputers();
 
             do
             {
-                Console.Write("Choose a given option to see the information on something or write in a number higher than 5 to leave the menu:" +
+                Console.Write("Choose a given option to see the information on something or write in a number higher than 5 to leave the menu:\n" +
                     "1) The specific item you'd like\n" +
                     "2) Computers whose warranty expires in a certain year\n" +
                     "3) How many pieces of technology have a battery\n" +
                     "4) Phones of a certain brand\n" +
                     "5) The names and phone numbers of employes whose warranty expires in a certain year\n" +
                     "6) Vehicles whose warranty expires in a month or less\n" +
-                    "7) Price and price change of a certain piece of hardware\n");
+                    "7) Price and price change of a certain piece of hardware\n" +
+                    "8) All the computers with a certain operating system\n");
                 choice = int.Parse(Console.ReadLine());
                 switch (choice)
                 {
                     case 1:
                         Console.WriteLine("Please enter the serial number of the item you'd like to see");
-                        var specificItem = int.Parse(Console.ReadLine());
-                        Console.WriteLine(OutputForACertainItem(specificItem, Vehicles, Phones, Computers));
+                        try
+                        {
+                            var specificItem = int.Parse(Console.ReadLine());
+                            Console.WriteLine(OutputForACertainItem(specificItem, vehicles, phones, computers));
+                        }
+                        catch
+                        {
+                            Console.WriteLine("The input was a bad format");
+                        }
+                        
                         break;
                     case 2:
+                        Console.WriteLine("Enter the year in which you want to see which computers warranties expire");
+                        try
+                        {
+                            var year = int.Parse(Console.ReadLine());
+                            List<Computer> locatedComputers = ComputersWithCertainWarranty(year, computers);
+                            if (locatedComputers != null)
+                            {
+                                foreach (Computer c in locatedComputers)
+                                    Console.WriteLine(c.SerialNumber + " " + c.Description + " " + c.DateOfAquiring);
+                            }
+                            else
+                                Console.WriteLine("There are none that expire in the given year");
+                        }
+                        catch {
+                            Console.WriteLine("The input was a bad format");
+                        }
                         break;
                     case 3:
-                        var numberOfBatteries = NumberOfTechGearWithBattery(Phones, Computers);
+                        var numberOfBatteries = NumberOfTechGearWithBattery(phones, computers);
                         Console.WriteLine("The number of batteries in use is {0}", numberOfBatteries);
                         break;
                     case 4:
+                        try
+                        {
+                            Console.WriteLine("Enter the brand of phones you'd like to see");
+                            var whichBrand = Console.ReadLine();
+                            var brandedPhones = PhonesOfACertainBrand(whichBrand, phones);
+                            if (brandedPhones != null)
+                            {
+                                foreach(MobilePhone c in brandedPhones)
+                                    Console.WriteLine(c.SerialNumber + " " + c.Description + " " + c.DateOfAquiring);
+                            }
+                         }
+                        catch {
+                            Console.WriteLine("Krivi tip unosa");
+                            break;
+                        }
                         break;
                     case 5:
+                        Console.WriteLine("Enter the year in which you want to see which phones warranties expire");
+                        try
+                        {
+                            var year = int.Parse(Console.ReadLine());
+                            List<MobilePhone> locatedPhones = PhonesWithCertainWarranty(year, phones);
+                            if (locatedPhones != null)
+                            {
+                                foreach (MobilePhone c in locatedPhones)
+                                    Console.WriteLine(c.SerialNumber + " " + c.Owner + " " + c.PhoneNumber);
+                            }
+                            else
+                                Console.WriteLine("There are none that expire in the given year");
+                        }
+                        catch
+                        {
+                            Console.WriteLine("The input was a bad format");
+                        }
                         break;
                     case 6:
                         break;
                     case 7:
                         break;
+                    case 8:
+                        try
+                        {
+                            Console.WriteLine("Enter the OS and we'll display the computers that run them");
+                            var whichOS = Console.ReadLine();
+                            var systemComps = CompsOfACertainOS(whichOS, computers);
+                            if (systemComps != null)
+                            {
+                                foreach (Computer c in systemComps)
+                                    Console.WriteLine(c.SerialNumber + " " + c.Description + " " + c.OperatingSystem);
+                            }
+                        }
+                        catch
+                        {
+                            Console.WriteLine("Krivi tip unosa");
+                            break;
+                        }
+                        break;
                 }
-            } while (choice > 0 && choice < 8);
+            } while (choice > 0 && choice < 9);
             Console.WriteLine("Have a nice day!");
             Console.ReadKey();
         }
 
         //Methods for the main menu
 
-        //Method to show the user a certain item he requested through the input of it's serial number
+        //Method to show the user a certain item he requested through the input of it's serial number  11111
         static string OutputForACertainItem(int number, List<Vehicle> vehicles, List<MobilePhone> phones, List<Computer> computers)
         {
             foreach (Vehicle v in vehicles)
@@ -80,6 +155,24 @@ namespace Inventory
             return "The id does not exist";
         }
 
+        //Methos used to search for when a warranty will expire    2222222
+        static List<Computer> ComputersWithCertainWarranty(int number, List<Computer> allComputers)
+        {
+            var computers = new List<Computer>();
+
+            foreach (Computer c in allComputers)
+            {
+                var year = c.DateOfAquiring.Year;
+                var months = c.DateOfAquiring.Month + c.Warranty;
+                year += months / 12;
+                if (year == number)
+                    computers.Add(c);
+            }
+
+            return computers;
+        }
+
+        //Just returns the number of objects that have a battery     333333
         static int NumberOfTechGearWithBattery(List<MobilePhone> phones, List<Computer> computers)
         {
             var batteryCounter = 0;
@@ -98,6 +191,48 @@ namespace Inventory
             return batteryCounter;
         }
 
+        // lists all the phones that are the brand the user inputs       44444
+        static List<MobilePhone> PhonesOfACertainBrand(string brand, List<MobilePhone> phones)
+        {
+            var thePhonesYouAreLoookingFor = new List<MobilePhone>();
+            foreach (MobilePhone p in phones)
+            {
+                if (p.Seller.ToLower() == brand)
+                    thePhonesYouAreLoookingFor.Add(p);
+            }
+
+            return thePhonesYouAreLoookingFor;
+        }
+
+        // prints out all the phones that have warranties which expire in the given year     55555
+        static List<MobilePhone> PhonesWithCertainWarranty(int number, List<MobilePhone> allPhones)
+        {
+            var phones = new List<MobilePhone>();
+
+            foreach (MobilePhone c in allPhones)
+            {
+                var year = c.DateOfAquiring.Year;
+                var months = c.DateOfAquiring.Month + c.Warranty;
+                year += months / 12;
+                if (year == number)
+                    phones.Add(c);
+            }
+
+            return phones;
+        }
+
+        // lists all the computers that use the required OS         88888
+        static List<Computer> CompsOfACertainOS(string OS, List<Computer> computers)
+        {
+            var certainOS = new List<Computer>();
+            foreach (Computer p in computers)
+            {
+                if (p.OperatingSystem.ToLower() == OS.ToLower())
+                    certainOS.Add(p);
+            }
+
+            return certainOS;
+        }
         //Creating dummy objects for easier testing of aplication
         static List<Vehicle> PreliminaryInputVehicles()
         {
