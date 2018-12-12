@@ -105,6 +105,11 @@ namespace Inventory
                         }
                         break;
                     case 6:
+                        var locatedVehicles = VehiclesWithCertainWarranty(vehicles);
+                        foreach (Vehicle v in locatedVehicles)
+                            Console.WriteLine(v.Description + " " + v.WarrantyExpirationDate + " " + v.Mileage);
+                        if (locatedVehicles == null)
+                            Console.WriteLine("There are none that expire next month");
                         break;
                     case 7:
                         break;
@@ -221,6 +226,26 @@ namespace Inventory
             return phones;
         }
 
+        // prints out all the vehicles that have warranties which expire in a month or less     66666
+        static List<Vehicle> VehiclesWithCertainWarranty(List<Vehicle> allVehicles)
+        {
+            var vehicles = new List<Vehicle>();
+
+            foreach (Vehicle c in allVehicles)
+            {
+                var monthCarWarrantyExpires = c.WarrantyExpirationDate.Month;
+                var dayCarWarrantyExpires = c.WarrantyExpirationDate.Day;
+                var currentMonth = DateTime.Now.Month;
+                var currentDay = DateTime.Now.Day;
+                if ((monthCarWarrantyExpires == (currentMonth + 1) && dayCarWarrantyExpires < currentDay) || (monthCarWarrantyExpires == currentMonth && dayCarWarrantyExpires > currentDay))
+                {
+                    vehicles.Add(c);
+                }
+            }
+
+            return vehicles;
+        }
+
         // lists all the computers that use the required OS         88888
         static List<Computer> CompsOfACertainOS(string OS, List<Computer> computers)
         {
@@ -243,7 +268,7 @@ namespace Inventory
             {
                 new DateTime(2011, 11, 1),
                 new DateTime(2010, 10, 2),
-                new DateTime(2014, 5, 1),
+                new DateTime(2018, 12, 25),
                 new DateTime(2000, 2, 2)
             };
             var warrantyOfVehicles = new int[4] { 24, 12, 36, 48 };
@@ -251,7 +276,7 @@ namespace Inventory
             var sellerOfVehicles = new string[4] { "Honda", "Toyota", "WolksVagen", "Ford" };
             var warrantyExpirationDateOfVehicles = new DateTime[4]
             {
-                new DateTime(2020, 11, 1),
+                new DateTime(2018, 12, 26),
                 new DateTime(2021, 10, 2),
                 new DateTime(2022, 5, 1),
                 new DateTime(2020, 2, 2)
