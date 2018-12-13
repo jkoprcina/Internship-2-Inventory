@@ -246,6 +246,27 @@ namespace Inventory
             return vehicles;
         }
 
+        //calculates all types of prices for vehicles 77777A
+        static string VehiclePrices(List<Vehicle> vehicles)
+        {
+            var prices = "";
+            foreach (Vehicle v in vehicles)
+            {
+                prices += v.Price;
+                prices += "\t";
+                var calc = v.Price / 20000;
+                var newPrice = 
+            }
+            return prices;
+        }
+
+        //calculates all types of prices for techgear 77777B
+        static string TechGearPrices(List<MobilePhone> phones, List<Computer> computers)
+        {
+            var prices = "";
+            return prices;
+        }
+
         // lists all the computers that use the required OS         88888
         static List<Computer> CompsOfACertainOS(string OS, List<Computer> computers)
         {
