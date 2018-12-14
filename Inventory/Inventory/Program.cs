@@ -14,7 +14,6 @@ namespace Inventory
             vehicles = PreliminaryInputVehicles();
             phones = PreliminaryInputPhones();
             computers = PreliminaryInputComputers();
-
             do
             {
                 Console.Write("Choose a given option or write 'ok' if you want to leave:\n" +
@@ -254,9 +253,21 @@ namespace Inventory
                     Console.WriteLine("Wrong entry, try again");
                 }
             } while (!success);
-            
-            Console.WriteLine("Enter a seller");
-            seller = Console.ReadLine();
+            do {
+                success = false;
+                Console.WriteLine("Enter a seller out of the listed");
+                var values = Enum.GetValues(typeof(VehicleCompanies));
+                foreach (var v in values)
+                {
+                    Console.WriteLine(v);
+                }
+                seller = Console.ReadLine();
+                foreach (var v in values)
+                {
+                    if (seller.ToLower() == v.ToString().ToLower())
+                        success = true;
+                }
+            } while (!success);
 
             var year = 0;
             var month = 0;
@@ -323,6 +334,7 @@ namespace Inventory
             var seller = "";
             var portable = false;
             var battery = false;
+            var operatingSystem = "";
 
             Console.WriteLine("Enter a description");
             description = Console.ReadLine();
@@ -349,8 +361,22 @@ namespace Inventory
                 }
             } while (!success);
 
-            Console.WriteLine("Enter a seller");
-            seller = Console.ReadLine();
+            do
+            {
+                success = false;
+                Console.WriteLine("Enter a seller out of the listed");
+                var values = Enum.GetValues(typeof(ComputerCompanies));
+                foreach (var v in values)
+                {
+                    Console.WriteLine(v);
+                }
+                seller = Console.ReadLine();
+                foreach (var v in values)
+                {
+                    if (seller.ToLower() == v.ToString().ToLower())
+                        success = true;
+                }
+            } while (!success);
 
             var year = 0;
             var month = 0;
@@ -400,10 +426,24 @@ namespace Inventory
                 success = bool.TryParse(text, out battery);
             } while (!success);
 
-            Console.WriteLine("Enter the operating system in use");
-            var OS = Console.ReadLine();
+            do
+            {
+                success = false;
+                Console.WriteLine("Enter a Operating System out of the listed");
+                var values = Enum.GetValues(typeof(OS));
+                foreach (var v in values)
+                {
+                    Console.WriteLine(v);
+                }
+                operatingSystem = Console.ReadLine();
+                foreach (var v in values)
+                {
+                    if (operatingSystem.ToLower() == v.ToString().ToLower())
+                        success = true;
+                }
+            } while (!success);
 
-            var comp = new Computer(Guid.NewGuid(), description, time, warranty, price, seller, battery, OS, portable);
+            var comp = new Computer(Guid.NewGuid(), description, time, warranty, price, seller, battery, operatingSystem, portable);
             return comp;
         }
         //Adding a new phone
@@ -442,8 +482,22 @@ namespace Inventory
                 }
             } while (!success);
 
-            Console.WriteLine("Enter a seller");
-            seller = Console.ReadLine();
+            do
+            {
+                success = false;
+                Console.WriteLine("Enter a seller out of the listed");
+                var values = Enum.GetValues(typeof(PhoneCompanies));
+                foreach (var v in values)
+                {
+                    Console.WriteLine(v);
+                }
+                seller = Console.ReadLine();
+                foreach (var v in values)
+                {
+                    if (seller.ToLower() == v.ToString().ToLower())
+                        success = true;
+                }
+            } while (!success);
 
             var year = 0;
             var month = 0;
@@ -823,6 +877,14 @@ namespace Inventory
             Honda = 2,
             Ford = 3,
             WolksVagen = 4
+        }
+
+        public enum OS
+        {
+            Android = 1,
+            Windows = 2,
+            iOS = 3,
+            Linux = 4
         }
     }
 }
