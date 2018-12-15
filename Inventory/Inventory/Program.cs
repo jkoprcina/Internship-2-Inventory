@@ -24,9 +24,10 @@ namespace Inventory
                     "4) Phones of a certain brand\n" +
                     "5) The names and phone numbers of employes whose warranty expires in a certain year\n" +
                     "6) Vehicles whose warranty expires in a month or less\n" +
-                    "7) Price and price change of a certain piece of hardware\n" +
+                    "7) Price and price change of all hardware\n" +
                     "8) All the computers with a certain operating system\n" +
-                    "9) Delete a Vehicle, Computer or MobilePhone\n");
+                    "9) Delete a Vehicle, Computer or MobilePhone\n" +
+                    "10) Show everything\n");
                 choice = Console.ReadLine();
                 var word = "";
                 switch (choice)
@@ -101,7 +102,7 @@ namespace Inventory
                             }
                          }
                         catch {
-                            Console.WriteLine("Krivi tip unosa");
+                            Console.WriteLine("Wrong input, try again");
                             break;
                         }
                         break;
@@ -152,7 +153,7 @@ namespace Inventory
                         }
                         catch
                         {
-                            Console.WriteLine("Krivi tip unosa");
+                            Console.WriteLine("Wrong input, try again");
                             break;
                         }
                         break;
@@ -163,10 +164,12 @@ namespace Inventory
                             Console.WriteLine("Would you like to remove a vehicle, computer or phone");
                             word = Console.ReadLine();
                             var text = "";
-                            Console.WriteLine("Enter the description of the item you wanna remove");
                             text = Console.ReadLine();
                             if (word.ToLower() == "vehicle")
                             {
+                                OutputVehicles(vehicles);
+                                Console.WriteLine("Enter the description of the item you wanna remove");
+                                text = Console.ReadLine();
                                 foreach (Vehicle v in vehicles)
                                 {
                                     if (v.Description == text)
@@ -181,6 +184,9 @@ namespace Inventory
                             }
                             else if (word.ToLower() == "computer")
                             {
+                                OutputComputers(computers);
+                                Console.WriteLine("Enter the description of the item you wanna remove");
+                                text = Console.ReadLine();
                                 foreach (Computer c in computers)
                                 {
                                     if (c.Description == text)
@@ -195,6 +201,9 @@ namespace Inventory
                             }
                             else if (word.ToLower() == "phone")
                             {
+                                OutputMobilePhones(phones);
+                                Console.WriteLine("Enter the description of the item you wanna remove");
+                                text = Console.ReadLine();
                                 foreach (MobilePhone m in phones)
                                 {
                                     if (m.Description == text)
@@ -208,6 +217,11 @@ namespace Inventory
                                     Console.WriteLine("That phone doesn't exist");
                             }
                         } while (word.ToLower() != "vehicle" && word.ToLower() != "computer" && word.ToLower() != "phone");
+                        break;
+                    case "10":
+                        OutputVehicles(vehicles);
+                        OutputComputers(computers);
+                        OutputMobilePhones(phones);
                         break;
                 }
                 choice = choice.ToLower();
@@ -291,7 +305,7 @@ namespace Inventory
                 {
                     Console.WriteLine("Wrong entry, try again");
                 }
-            } while (!success);
+            } while (!success || month < 1 || month > 12);
             do
             {
                 Console.WriteLine("Enter the day it was bought in number");
@@ -301,7 +315,7 @@ namespace Inventory
                 {
                     Console.WriteLine("Wrong entry, try again");
                 }
-            } while (!success);
+            } while (!success || day > 30 || day < 1);
             var time = new DateTime(year, month, day);
 
             var temp = month + warranty;
@@ -400,7 +414,7 @@ namespace Inventory
                 {
                     Console.WriteLine("Wrong entry, try again");
                 }
-            } while (!success);
+            } while (!success || month < 1 || month > 12);
             do
             {
                 Console.WriteLine("Enter the day it was bought in number");
@@ -410,7 +424,7 @@ namespace Inventory
                 {
                     Console.WriteLine("Wrong entry, try again");
                 }
-            } while (!success);
+            } while (!success || day > 30 || day < 1);
             var time = new DateTime(year, month, day);
 
             do {
@@ -521,7 +535,7 @@ namespace Inventory
                 {
                     Console.WriteLine("Wrong entry, try again");
                 }
-            } while (!success);
+            } while (!success || month < 1  || month > 12);
             do
             {
                 Console.WriteLine("Enter the day it was bought in number");
@@ -531,7 +545,7 @@ namespace Inventory
                 {
                     Console.WriteLine("Wrong entry, try again");
                 }
-            } while (!success);
+            } while (!success || day > 30 || day < 1);
             var time = new DateTime(year, month, day);
 
             bool battery;
@@ -766,6 +780,41 @@ namespace Inventory
             return phones;
         }
 
+        static void OutputVehicles(List<Vehicle> vehicles)
+        {
+            var counter = 1;
+            foreach (Vehicle v in vehicles)
+            {
+                Console.WriteLine("{0}. vehicle:",counter);
+                counter++;
+                Console.WriteLine(v.SerialNumber + " " + v.Description + " " + v.DateOfAquiring + " " + v.Warranty);
+                Console.WriteLine(v.Seller + " " + v.Price + " " + v.WarrantyExpirationDate + " " + v.Mileage);
+            }
+        }
+
+        static void OutputComputers(List<Computer> computers)
+        {
+            var counter = 1;
+            foreach(Computer v in computers)
+            {
+                Console.WriteLine("{0}. computer:", counter);
+                counter++;
+                Console.WriteLine(v.SerialNumber + " " + v.Description + " " + v.DateOfAquiring + " " + v.Warranty);
+                Console.WriteLine(v.Seller + " " + v.Price + " " + v.Battery + " " + v.OperatingSystem + " " + v.Portable);
+            }
+        }
+
+        static void OutputMobilePhones(List<MobilePhone> phones)
+        {
+            var counter = 1;
+            foreach (MobilePhone v in phones)
+            {
+                Console.WriteLine("{0}. phone:", counter);
+                counter++;
+                Console.WriteLine(v.SerialNumber + " " + v.Description + " " + v.DateOfAquiring + " " + v.Warranty);
+                Console.WriteLine(v.Seller + " " + v.Price + " " + v.Battery + " " + v.PhoneNumber + " " + v.Owner);
+            }
+        }
         //Creating dummy objects for easier testing of aplication
         static List<Vehicle> PreliminaryInputVehicles()
         {
