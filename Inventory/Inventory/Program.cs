@@ -6,14 +6,14 @@ namespace Inventory
     {
         static void Main(string[] args)
         {
-            var vehicles = new List<Vehicle>();
-            var phones = new List<MobilePhone>();
-            var computers = new List<Computer>();
+            var vehicles = PreliminaryInputVehicles();
+            var phones = PreliminaryInputPhones();
+            var computers = PreliminaryInputComputers();
+            var singleVehicle = vehicles[0];
+            var singlePhone = phones[0];
+            var singleComputer = computers[0];
             var choice = "";
-
-            vehicles = PreliminaryInputVehicles();
-            phones = PreliminaryInputPhones();
-            computers = PreliminaryInputComputers();
+            var success = false;
             do
             {
                 Console.Write("Choose a given option or write 'ok' if you want to leave:\n" +
@@ -39,122 +39,91 @@ namespace Inventory
                             word = Console.ReadLine();
                             if (word.ToLower() == "vehicle")
                             {
-                                var veh = AddingAVehicle();
+                                var veh = singleVehicle.AddVehicle();
                                 vehicles.Add(veh);
                             }
                             else if (word.ToLower() == "computer")
                             {
-                                var comp = AddingAComputer();
+                                var comp = singleComputer.AddComputer();
                                 computers.Add(comp);
                             }
                             else if (word.ToLower() == "phone")
                             {
-                                var pho = AddingAPhone();
+                                var pho = singlePhone.AddMobilePhone();
                                 phones.Add(pho);
                             }
                         } while (word.ToLower() != "vehicle" && word.ToLower() != "computer" && word.ToLower() != "phone");
                         break;
                     case "1":
                         Console.WriteLine("Please enter the description of the item you'd like to see");
-                        try
-                        {
-                            var specificItem = Console.ReadLine();
-                            Console.WriteLine(OutputForACertainItem(specificItem, vehicles, phones, computers));
-                        }
-                        catch
-                        {
-                            Console.WriteLine("The input was a bad format");
-                        }
-                        
+                        var specificItem = Console.ReadLine();
+                        Console.WriteLine(OutputForACertainItem(specificItem, vehicles, phones, computers));
                         break;
                     case "2":
                         Console.WriteLine("Enter the year in which you want to see which computers warranties expire");
-                        try
+                        success = int.TryParse(Console.ReadLine(), out var info);
+                        List<Computer> locatedComputers = singleComputer.ComputersWithCertainWarranty(info, computers);
+                        if (!success)
                         {
-                            var year = int.Parse(Console.ReadLine());
-                            List<Computer> locatedComputers = ComputersWithCertainWarranty(year, computers);
-                            if (locatedComputers != null)
-                            {
-                                foreach (Computer c in locatedComputers)
-                                    Console.WriteLine(c.SerialNumber + " " + c.Description + " " + c.DateOfAquiring);
-                            }
-                            else
-                                Console.WriteLine("There are none that expire in the given year");
+                            Console.WriteLine("Wrong entry, try again");
+                            break;
                         }
-                        catch {
-                            Console.WriteLine("The input was a bad format");
+                        if (locatedComputers != null)
+                        {
+                            foreach (var c in locatedComputers)
+                                Console.WriteLine(c.SerialNumber + " " + c.Description + " " + c.DateOfAcquiring);
                         }
+                        else
+                            Console.WriteLine("There are none that expire in the given year");
                         break;
                     case "3":
-                        var numberOfBatteries = NumberOfTechGearWithBattery(phones, computers);
+                        var numberOfBatteries = singlePhone.NumberOfTechGearWithBattery(phones, computers);
                         Console.WriteLine("The number of batteries in use is {0}", numberOfBatteries);
                         break;
                     case "4":
-                        try
+                        Console.WriteLine("Enter the brand of phones you'd like to see");
+                        var whichBrand = Console.ReadLine();
+                        var brandedPhones = singlePhone.PhonesOfACertainBrand(whichBrand, phones);
+                        if (brandedPhones != null)
                         {
-                            Console.WriteLine("Enter the brand of phones you'd like to see");
-                            var whichBrand = Console.ReadLine();
-                            var brandedPhones = PhonesOfACertainBrand(whichBrand, phones);
-                            if (brandedPhones != null)
-                            {
-                                foreach(MobilePhone c in brandedPhones)
-                                    Console.WriteLine(c.SerialNumber + " " + c.Description + " " + c.DateOfAquiring);
-                            }
-                         }
-                        catch {
-                            Console.WriteLine("Wrong input, try again");
-                            break;
+                            foreach(var c in brandedPhones)
+                                Console.WriteLine(c.SerialNumber + " " + c.Description + " " + c.DateOfAcquiring);
                         }
                         break;
                     case "5":
                         Console.WriteLine("Enter the year in which you want to see which phones warranties expire");
-                        try
+                        success = int.TryParse(Console.ReadLine(), out var year);
+                        List<MobilePhone> locatedPhones = singlePhone.PhonesWithCertainWarranty(year, phones);
+                        if (locatedPhones != null)
                         {
-                            var year = int.Parse(Console.ReadLine());
-                            List<MobilePhone> locatedPhones = PhonesWithCertainWarranty(year, phones);
-                            if (locatedPhones != null)
-                            {
-                                foreach (MobilePhone c in locatedPhones)
-                                    Console.WriteLine(c.SerialNumber + " " + c.Owner + " " + c.PhoneNumber);
-                            }
-                            else
-                                Console.WriteLine("There are none that expire in the given year");
+                            foreach (var c in locatedPhones)
+                                Console.WriteLine(c.SerialNumber + " " + c.Owner + " " + c.PhoneNumber);
                         }
-                        catch
-                        {
-                            Console.WriteLine("The input was a bad format");
-                        }
+                        else
+                            Console.WriteLine("There are none that expire in the given year");
                         break;
                     case "6":
-                        var locatedVehicles = VehiclesWithCertainWarranty(vehicles);
-                        foreach (Vehicle v in locatedVehicles)
+                        var locatedVehicles = singleVehicle.VehiclesWithCertainWarranty(vehicles);
+                        foreach (var v in locatedVehicles)
                             Console.WriteLine(v.Description + " " + v.WarrantyExpirationDate + " " + v.Mileage);
                         if (locatedVehicles == null)
                             Console.WriteLine("There are none that expire next month");
                         break;
                     case "7":
                         Console.WriteLine("All the pricing information");
-                        var vehiclePrices = VehiclePrices(vehicles);
-                        var techGear = TechGearPrices(phones, computers);
+                        var vehiclePrices = singleVehicle.VehiclePrices(vehicles);
+                        var techGear = singlePhone.TechGearPrices(phones, computers);
                         Console.WriteLine(vehiclePrices);
                         Console.WriteLine(techGear);
                         break;
                     case "8":
-                        try
+                        Console.WriteLine("Enter the OS and we'll display the computers that run them");
+                        var whichOS = Console.ReadLine();
+                        var systemComps = singleComputer.CompsOfACertainOS(whichOS, computers);
+                        if (systemComps != null)
                         {
-                            Console.WriteLine("Enter the OS and we'll display the computers that run them");
-                            var whichOS = Console.ReadLine();
-                            var systemComps = CompsOfACertainOS(whichOS, computers);
-                            if (systemComps != null)
-                            {
-                                foreach (Computer c in systemComps)
-                                    Console.WriteLine(c.SerialNumber + " " + c.Description + " " + c.OperatingSystem);
-                            }
-                        }
-                        catch
-                        {
-                            Console.WriteLine("Wrong input, try again");
-                            break;
+                            foreach (var c in systemComps)
+                                Console.WriteLine(c.SerialNumber + " " + c.Description + " " + c.OperatingSystem);
                         }
                         break;
                     case "9":
@@ -164,54 +133,53 @@ namespace Inventory
                             Console.WriteLine("Would you like to remove a vehicle, computer or phone");
                             word = Console.ReadLine();
                             var text = "";
-                            text = Console.ReadLine();
                             if (word.ToLower() == "vehicle")
                             {
-                                OutputVehicles(vehicles);
+                                singleVehicle.OutputVehicles(vehicles);
                                 Console.WriteLine("Enter the description of the item you wanna remove");
                                 text = Console.ReadLine();
-                                foreach (Vehicle v in vehicles)
+                                foreach (var v in vehicles)
                                 {
                                     if (v.Description == text)
                                         checking = true;
                                 }
                                 if (checking == true)
                                 {
-                                    RemovingAVehicle(text, vehicles);
+                                    vehicles[0].RemovingVehicle(text, vehicles);
                                 }
                                 else
                                     Console.WriteLine("That vehicle doesn't exist");
                             }
                             else if (word.ToLower() == "computer")
                             {
-                                OutputComputers(computers);
+                                singleComputer.OutputComputers(computers);
                                 Console.WriteLine("Enter the description of the item you wanna remove");
                                 text = Console.ReadLine();
-                                foreach (Computer c in computers)
+                                foreach (var c in computers)
                                 {
                                     if (c.Description == text)
                                         checking = true;
                                 }
                                 if (checking == true)
                                     {
-                                    RemovingAComputer(text, computers);
+                                    singleComputer.RemovingComputer(text, computers);
                                 }
                                 else
                                     Console.WriteLine("That computer doesn't exist");
                             }
                             else if (word.ToLower() == "phone")
                             {
-                                OutputMobilePhones(phones);
+                                singlePhone.OutputMobilePhones(phones);
                                 Console.WriteLine("Enter the description of the item you wanna remove");
                                 text = Console.ReadLine();
-                                foreach (MobilePhone m in phones)
+                                foreach (var m in phones)
                                 {
                                     if (m.Description == text)
                                         checking = true;
                                 }
                                 if (checking == true)
                                 {
-                                    RemovingAPhone(text, phones);
+                                    singlePhone.RemovingPhone(text, phones);
                                 }
                                 else
                                     Console.WriteLine("That phone doesn't exist");
@@ -219,9 +187,9 @@ namespace Inventory
                         } while (word.ToLower() != "vehicle" && word.ToLower() != "computer" && word.ToLower() != "phone");
                         break;
                     case "10":
-                        OutputVehicles(vehicles);
-                        OutputComputers(computers);
-                        OutputMobilePhones(phones);
+                        singleVehicle.OutputVehicles(vehicles);
+                        singleComputer.OutputComputers(computers);
+                        singlePhone.OutputMobilePhones(phones);
                         break;
                 }
                 choice = choice.ToLower();
@@ -230,354 +198,19 @@ namespace Inventory
             Console.ReadKey();
         }
 
-        //Methods for the main menu
-
-        //Adding Methods 00000
-        //Adding a new vehicle 
-        static Vehicle AddingAVehicle()
-        {
-            var success = false;
-            var description = "";
-            var warranty = 0;
-            var price = 0.0;
-            var seller = "";
-            var mileage = 0.0;
-
-            Console.WriteLine("Enter a description");
-            description = Console.ReadLine();
-
-            do
-            {
-                Console.WriteLine("Enter the warranty in number of months");
-                var number = Console.ReadLine();
-                success = int.TryParse(number, out warranty);
-                if (!success)
-                {
-                    Console.WriteLine("Wrong entry, try again");
-                }
-            } while (!success);
-
-            do
-            {
-                Console.WriteLine("Enter a price");
-                var number = Console.ReadLine();
-                success = double.TryParse(number, out price);
-                if (!success)
-                {
-                    Console.WriteLine("Wrong entry, try again");
-                }
-            } while (!success);
-            do {
-                success = false;
-                Console.WriteLine("Enter a seller out of the listed");
-                var values = Enum.GetValues(typeof(VehicleCompanies));
-                foreach (var v in values)
-                {
-                    Console.WriteLine(v);
-                }
-                seller = Console.ReadLine();
-                foreach (var v in values)
-                {
-                    if (seller.ToLower() == v.ToString().ToLower())
-                        success = true;
-                }
-            } while (!success);
-
-            var year = 0;
-            var month = 0;
-            var day = 0;
-            do
-            {
-                Console.WriteLine("Enter the year it was bought in number");
-                var number = Console.ReadLine();
-                success = int.TryParse(number, out year);
-                if (!success)
-                {
-                    Console.WriteLine("Wrong entry, try again");
-                }
-            } while (!success);
-            do
-            {
-                Console.WriteLine("Enter the month it was bought in number");
-                var number = Console.ReadLine();
-                success = int.TryParse(number, out month);
-                if (!success)
-                {
-                    Console.WriteLine("Wrong entry, try again");
-                }
-            } while (!success || month < 1 || month > 12);
-            do
-            {
-                Console.WriteLine("Enter the day it was bought in number");
-                var number = Console.ReadLine();
-                success = int.TryParse(number, out day);
-                if (!success)
-                {
-                    Console.WriteLine("Wrong entry, try again");
-                }
-            } while (!success || day > 30 || day < 1);
-            var time = new DateTime(year, month, day);
-
-            var temp = month + warranty;
-            var tempYear = temp / 12;
-            var tempMonth = temp % 12;
-
-            var timeExp = new DateTime(tempYear, tempMonth, day);
-
-            do
-            {
-                Console.WriteLine("Enter the mileage");
-                var number = Console.ReadLine();
-                success = double.TryParse(number, out mileage);
-                if (!success)
-                {
-                    Console.WriteLine("Wrong entry, try again");
-                }
-            } while (!success);
-
-            var veh = new Vehicle(Guid.NewGuid(), description, time, warranty, price, seller, timeExp, mileage);
-            return veh;
-        }
-        //Adding a new computer
-        static Computer AddingAComputer()
-        {
-            var success = false;
-            var description = "";
-            var warranty = 0;
-            var price = 0.0;
-            var seller = "";
-            var portable = false;
-            var battery = false;
-            var operatingSystem = "";
-
-            Console.WriteLine("Enter a description");
-            description = Console.ReadLine();
-
-            do
-            {
-                Console.WriteLine("Enter the warranty in number of months");
-                var number = Console.ReadLine();
-                success = int.TryParse(number, out warranty);
-                if (!success)
-                {
-                    Console.WriteLine("Wrong entry, try again");
-                }
-            } while (!success);
-
-            do
-            {
-                Console.WriteLine("Enter a price");
-                var number = Console.ReadLine();
-                success = double.TryParse(number, out price);
-                if (!success)
-                {
-                    Console.WriteLine("Wrong entry, try again");
-                }
-            } while (!success);
-
-            do
-            {
-                success = false;
-                Console.WriteLine("Enter a seller out of the listed");
-                var values = Enum.GetValues(typeof(ComputerCompanies));
-                foreach (var v in values)
-                {
-                    Console.WriteLine(v);
-                }
-                seller = Console.ReadLine();
-                foreach (var v in values)
-                {
-                    if (seller.ToLower() == v.ToString().ToLower())
-                        success = true;
-                }
-            } while (!success);
-
-            var year = 0;
-            var month = 0;
-            var day = 0;
-            do
-            {
-                Console.WriteLine("Enter the year it was bought in number");
-                var number = Console.ReadLine();
-                success = int.TryParse(number, out year);
-                if (!success)
-                {
-                    Console.WriteLine("Wrong entry, try again");
-                }
-            } while (!success);
-            do
-            {
-                Console.WriteLine("Enter the month it was bought in number");
-                var number = Console.ReadLine();
-                success = int.TryParse(number, out month);
-                if (!success)
-                {
-                    Console.WriteLine("Wrong entry, try again");
-                }
-            } while (!success || month < 1 || month > 12);
-            do
-            {
-                Console.WriteLine("Enter the day it was bought in number");
-                var number = Console.ReadLine();
-                success = int.TryParse(number, out day);
-                if (!success)
-                {
-                    Console.WriteLine("Wrong entry, try again");
-                }
-            } while (!success || day > 30 || day < 1);
-            var time = new DateTime(year, month, day);
-
-            do {
-                Console.WriteLine("Write 'true' if you computer is portable or 'false' if it's not");
-                var text = Console.ReadLine();
-                success = bool.TryParse(text, out portable);
-            } while (!success);
-
-            do
-            {
-                Console.WriteLine("Write 'true' if you computer has a battery or 'false' if it doesn't");
-                var text = Console.ReadLine();
-                success = bool.TryParse(text, out battery);
-            } while (!success);
-
-            do
-            {
-                success = false;
-                Console.WriteLine("Enter a Operating System out of the listed");
-                var values = Enum.GetValues(typeof(OS));
-                foreach (var v in values)
-                {
-                    Console.WriteLine(v);
-                }
-                operatingSystem = Console.ReadLine();
-                foreach (var v in values)
-                {
-                    if (operatingSystem.ToLower() == v.ToString().ToLower())
-                        success = true;
-                }
-            } while (!success);
-
-            var comp = new Computer(Guid.NewGuid(), description, time, warranty, price, seller, battery, operatingSystem, portable);
-            return comp;
-        }
-        //Adding a new phone
-        static MobilePhone AddingAPhone()
-        {
-            var success = false;
-            var description = "";
-            var warranty = 0;
-            var price = 0.0;
-            var seller = "";
-            var phoneNumber = "";
-            var owner = "";
-
-            Console.WriteLine("Enter a description");
-            description = Console.ReadLine();
-
-            do
-            {
-                Console.WriteLine("Enter the warranty in number of months");
-                var number = Console.ReadLine();
-                success = int.TryParse(number, out warranty);
-                if (!success)
-                {
-                    Console.WriteLine("Wrong entry, try again");
-                }
-            } while (!success);
-
-            do
-            {
-                Console.WriteLine("Enter a price");
-                var number = Console.ReadLine();
-                success = double.TryParse(number, out price);
-                if (!success)
-                {
-                    Console.WriteLine("Wrong entry, try again");
-                }
-            } while (!success);
-
-            do
-            {
-                success = false;
-                Console.WriteLine("Enter a seller out of the listed");
-                var values = Enum.GetValues(typeof(PhoneCompanies));
-                foreach (var v in values)
-                {
-                    Console.WriteLine(v);
-                }
-                seller = Console.ReadLine();
-                foreach (var v in values)
-                {
-                    if (seller.ToLower() == v.ToString().ToLower())
-                        success = true;
-                }
-            } while (!success);
-
-            var year = 0;
-            var month = 0;
-            var day = 0;
-            do
-            {
-                Console.WriteLine("Enter the year it was bought in number");
-                var number = Console.ReadLine();
-                success = int.TryParse(number, out year);
-                if (!success)
-                {
-                    Console.WriteLine("Wrong entry, try again");
-                }
-            } while (!success);
-            do
-            {
-                Console.WriteLine("Enter the month it was bought in number");
-                var number = Console.ReadLine();
-                success = int.TryParse(number, out month);
-                if (!success)
-                {
-                    Console.WriteLine("Wrong entry, try again");
-                }
-            } while (!success || month < 1  || month > 12);
-            do
-            {
-                Console.WriteLine("Enter the day it was bought in number");
-                var number = Console.ReadLine();
-                success = int.TryParse(number, out day);
-                if (!success)
-                {
-                    Console.WriteLine("Wrong entry, try again");
-                }
-            } while (!success || day > 30 || day < 1);
-            var time = new DateTime(year, month, day);
-
-            bool battery;
-            do
-            {
-                Console.WriteLine("Write 'true' if you computer has a battery or 'false' if it doesn't");
-                var text = Console.ReadLine();
-                success = bool.TryParse(text, out battery);
-            } while (!success);
-
-            Console.WriteLine("Enter your phone number");
-            phoneNumber = Console.ReadLine();
-            Console.WriteLine("Write the owners first and last name at once");
-            owner = Console.ReadLine();
-
-            var phon = new MobilePhone(Guid.NewGuid(), description, time, warranty, price, seller, battery, phoneNumber, owner);
-            return phon;
-        }
-        //Method to show the user a certain item he requested through the input of it's serial number  11111
         static string OutputForACertainItem(string text, List<Vehicle> vehicles, List<MobilePhone> phones, List<Computer> computers)
         {
-            foreach (Vehicle v in vehicles)
+            foreach (var v in vehicles)
             {
                 if (v.Description == text)
                     return (v.SerialNumber + " " + v.Description + " " + v.Seller);
             }
-            foreach (MobilePhone p in phones)
+            foreach (var p in phones)
             {
                 if (p.Description == text)
                     return (p.SerialNumber + " " + p.Description + " " + p.Seller);
             }
-            foreach (Computer c in computers)
+            foreach (var c in computers)
             {
                 if (c.Description == text)
                     return (c.SerialNumber + " " + c.Description + " " + c.Seller);
@@ -585,355 +218,46 @@ namespace Inventory
             return "The id does not exist";
         }
 
-        //Methos used to search for when a warranty will expire    2222222
-        static List<Computer> ComputersWithCertainWarranty(int number, List<Computer> allComputers)
-        {
-            var computers = new List<Computer>();
-
-            foreach (Computer c in allComputers)
-            {
-                var year = c.DateOfAquiring.Year;
-                var months = c.DateOfAquiring.Month + c.Warranty;
-                year += months / 12;
-                if (year == number)
-                    computers.Add(c);
-            }
-
-            return computers;
-        }
-
-        //Just returns the number of objects that have a battery     333333
-        static int NumberOfTechGearWithBattery(List<MobilePhone> phones, List<Computer> computers)
-        {
-            var batteryCounter = 0;
-
-            foreach (MobilePhone p in phones)
-            {
-                if (p.Battery)
-                    batteryCounter++;
-            }
-            foreach (Computer c in computers)
-            {
-                if (c.Battery)
-                    batteryCounter++;
-            }
-
-            return batteryCounter;
-        }
-
-        // lists all the phones that are the brand the user inputs       44444
-        static List<MobilePhone> PhonesOfACertainBrand(string brand, List<MobilePhone> phones)
-        {
-            var thePhonesYouAreLoookingFor = new List<MobilePhone>();
-            foreach (MobilePhone p in phones)
-            {
-                if (p.Seller.ToLower() == brand)
-                    thePhonesYouAreLoookingFor.Add(p);
-            }
-
-            return thePhonesYouAreLoookingFor;
-        }
-
-        // prints out all the phones that have warranties which expire in the given year     55555
-        static List<MobilePhone> PhonesWithCertainWarranty(int number, List<MobilePhone> allPhones)
-        {
-            var phones = new List<MobilePhone>();
-
-            foreach (MobilePhone c in allPhones)
-            {
-                var year = c.DateOfAquiring.Year;
-                var months = c.DateOfAquiring.Month + c.Warranty;
-                year += months / 12;
-                if (year == number)
-                    phones.Add(c);
-            }
-
-            return phones;
-        }
-
-        // prints out all the vehicles that have warranties which expire in a month or less     66666
-        static List<Vehicle> VehiclesWithCertainWarranty(List<Vehicle> allVehicles)
-        {
-            var vehicles = new List<Vehicle>();
-
-            foreach (Vehicle c in allVehicles)
-            {
-                var monthCarWarrantyExpires = c.WarrantyExpirationDate.Month;
-                var dayCarWarrantyExpires = c.WarrantyExpirationDate.Day;
-                var currentMonth = DateTime.Now.Month;
-                var currentDay = DateTime.Now.Day;
-                if ((monthCarWarrantyExpires == (currentMonth + 1) && dayCarWarrantyExpires < currentDay) || (monthCarWarrantyExpires == currentMonth && dayCarWarrantyExpires > currentDay))
-                {
-                    vehicles.Add(c);
-                }
-            }
-
-            return vehicles;
-        }
-
-        //calculates all types of prices for vehicles 77777A
-        static string VehiclePrices(List<Vehicle> vehicles)
-        {
-            var prices = "";
-            foreach (Vehicle v in vehicles)
-            { 
-                prices += v.Description + "\t" + v.Price + "\t";
-                var calc = v.Mileage / 20000;
-                int number = (int)calc;
-                var newPrice = 0.0;
-                if (v.Price * (calc / 10) > (v.Price * 0.2))
-                {
-                    newPrice = v.Price - (v.Price * (calc / 10));
-                    prices += newPrice + "\t" + (v.Price - newPrice) +"\n";
-                }
-                else
-                {
-                    newPrice = v.Price * 0.2;
-                    prices += newPrice + "\t" + (v.Price - newPrice) + "\n";
-                }
-            }
-            return prices;
-        }
-
-        //calculates all types of prices for techgear      77777B
-        static string TechGearPrices(List<MobilePhone> phones, List<Computer> computers)
-        {
-            var prices = "";
-
-            foreach (MobilePhone v in phones)
-            {
-                prices += v.Description + "\t" + v.Price + "\t";
-                var current = new DateTime();
-                var currentYear = current.Year;
-                var currentMonth = current.Month;
-                var currentDay = current.Day;
-
-                var yearDifference = currentYear - v.DateOfAquiring.Year;
-                var monthDifference = currentMonth - v.DateOfAquiring.Month;
-                monthDifference += yearDifference * 12;
-                var percentage = (monthDifference * 0.5);
-
-                if ((v.Price * (monthDifference * 0.5)) > (0.3 * v.Price))
-                {
-                    var newPrice = (v.Price * (monthDifference * 0.5));
-                    prices += newPrice + "\t" + (v.Price - newPrice) + "\n";
-                }
-                else
-                {
-                    var newPrice = 0.3 * v.Price;
-                    prices += newPrice + "\t" + (v.Price - newPrice) + "\n";
-                }
-            }
-
-            foreach (Computer v in computers)
-            {
-                prices += v.Description + "\t" + v.Price + "\t";
-                var current = new DateTime();
-                var currentYear = current.Year;
-                var currentMonth = current.Month;
-                var currentDay = current.Day;
-
-                var yearDifference = currentYear - v.DateOfAquiring.Year;
-                var monthDifference = currentMonth - v.DateOfAquiring.Month;
-                monthDifference += yearDifference * 12;
-                var percentage = (monthDifference * 5) / 100;
-
-                if ((v.Price * (monthDifference * 5) / 100) > (0.3 * v.Price))
-                    prices += v.Price * (monthDifference * 5) / 100 + "\t" + (v.Price * (monthDifference * 5) / 100) + "\n";
-                else
-                    prices += (0.3 * v.Price) + "\t" + (v.Price - 0.3 * v.Price) + "\n";
-
-            }
-            return prices;
-        }
-
-        // lists all the computers that use the required OS         88888
-        static List<Computer> CompsOfACertainOS(string OS, List<Computer> computers)
-        {
-            var certainOS = new List<Computer>();
-            foreach (Computer p in computers)
-            {
-                if (p.OperatingSystem.ToLower() == OS.ToLower())
-                    certainOS.Add(p);
-            }
-
-            return certainOS;
-        }
-
-        //Method for removing objects 
-        //removing a vehicle
-        static List<Vehicle> RemovingAVehicle(string text, List<Vehicle> vehicles)
-        {
-            vehicles.RemoveAll(s => s.Description == text);
-            return vehicles;
-        }
-        //removing a computer
-        static List<Computer> RemovingAComputer(string text, List<Computer> computers)
-        {
-            computers.RemoveAll(s => s.Description == text);
-            return computers;
-        }
-        //removing a phone
-        static List<MobilePhone> RemovingAPhone(string text, List<MobilePhone> phones)
-        {
-            phones.RemoveAll(s => s.Description == text);
-            return phones;
-        }
-
-        static void OutputVehicles(List<Vehicle> vehicles)
-        {
-            var counter = 1;
-            foreach (Vehicle v in vehicles)
-            {
-                Console.WriteLine("{0}. vehicle:",counter);
-                counter++;
-                Console.WriteLine(v.SerialNumber + " " + v.Description + " " + v.DateOfAquiring + " " + v.Warranty);
-                Console.WriteLine(v.Seller + " " + v.Price + " " + v.WarrantyExpirationDate + " " + v.Mileage);
-            }
-        }
-
-        static void OutputComputers(List<Computer> computers)
-        {
-            var counter = 1;
-            foreach(Computer v in computers)
-            {
-                Console.WriteLine("{0}. computer:", counter);
-                counter++;
-                Console.WriteLine(v.SerialNumber + " " + v.Description + " " + v.DateOfAquiring + " " + v.Warranty);
-                Console.WriteLine(v.Seller + " " + v.Price + " " + v.Battery + " " + v.OperatingSystem + " " + v.Portable);
-            }
-        }
-
-        static void OutputMobilePhones(List<MobilePhone> phones)
-        {
-            var counter = 1;
-            foreach (MobilePhone v in phones)
-            {
-                Console.WriteLine("{0}. phone:", counter);
-                counter++;
-                Console.WriteLine(v.SerialNumber + " " + v.Description + " " + v.DateOfAquiring + " " + v.Warranty);
-                Console.WriteLine(v.Seller + " " + v.Price + " " + v.Battery + " " + v.PhoneNumber + " " + v.Owner);
-            }
-        }
-        //Creating dummy objects for easier testing of aplication
         static List<Vehicle> PreliminaryInputVehicles()
         {
             var listOfVehicles = new List<Vehicle>();
-
-            var descriptionsOfVehicles = new string[4] { "Good", "A firetruck", "A lamborgini ( boss's car)", "Run down" };
-            var dateOfAquiringOfVehicles = new DateTime[4]
-            {
-                new DateTime(2011, 11, 1),
-                new DateTime(2010, 10, 2),
-                new DateTime(2018, 12, 25),
-                new DateTime(2000, 2, 2)
-            };
-            var warrantyOfVehicles = new int[4] { 24, 12, 36, 48 };
-            var priceOfVehicles = new double[4] { 10000, 21000, 30000, 15000 };
-            var sellerOfVehicles = new string[4] { "Honda", "Toyota", "WolksVagen", "Ford" };
-            var warrantyExpirationDateOfVehicles = new DateTime[4]
-            {
-                new DateTime(2018, 12, 26),
-                new DateTime(2021, 10, 2),
-                new DateTime(2022, 5, 1),
-                new DateTime(2020, 2, 2)
-            };
-            var mileageOfVehicles = new double[4] { 100000.5, 50535.3, 40000.53, 311.3 };
-
-            for (int i = 0; i < 4; i++)
-            {
-                var dummyVehicle = new Vehicle(Guid.NewGuid(), descriptionsOfVehicles[i], dateOfAquiringOfVehicles[i], warrantyOfVehicles[i], priceOfVehicles[i], sellerOfVehicles[i], warrantyExpirationDateOfVehicles[i], mileageOfVehicles[i]);
-                listOfVehicles.Add(dummyVehicle);
-            }
+            var tempVehicle = new Vehicle(Guid.NewGuid(), "Good", new DateTime(2011, 11, 1).Date, 24, 10000.0, Vehicle.VehicleCompanies.Toyota, new DateTime(2018, 12, 26).Date, 1000.0);
+            listOfVehicles.Add(tempVehicle);
+            tempVehicle = new Vehicle(Guid.NewGuid(), "A firetruck", new DateTime(2010, 10, 2).Date, 12, 21000, Vehicle.VehicleCompanies.Honda, new DateTime(2021, 10, 2).Date, 100000.5);
+            listOfVehicles.Add(tempVehicle);
+            tempVehicle = new Vehicle(Guid.NewGuid(), "A lamborgini ( boss's car)", new DateTime(2018, 12, 25).Date, 36, 30000, Vehicle.VehicleCompanies.Ford, new DateTime(2018, 12, 26).Date, 50535.3);
+            listOfVehicles.Add(tempVehicle);
+            tempVehicle = new Vehicle(Guid.NewGuid(), "Run down", new DateTime(2000, 2, 2).Date, 48, 15000, Vehicle.VehicleCompanies.Honda, new DateTime(2022, 5, 1).Date, 40000.53);
+            listOfVehicles.Add(tempVehicle);
             return listOfVehicles;
         }
 
         static List<MobilePhone> PreliminaryInputPhones()
         {
             var listOfPhones = new List<MobilePhone>();
-
-            var descriptionsOfPhones = new string[4] { "Old", "Bad touchscreen", "A iphone X ( boss's phone)", "Barely working" };
-            var dateOfAquiringOfPhones = new DateTime[4]
-            {
-                new DateTime(2011, 11, 1),
-                new DateTime(2010, 10, 2),
-                new DateTime(2014, 5, 1),
-                new DateTime(2000, 2, 2)
-            };
-            var warrantyOfPhones = new int[4] { 0, 12, 24, 12 };
-            var priceOfPhones = new double[4] { 1000, 400, 200, 800};
-            var batteryOfPhones = new bool[4] { true, false, true, false };
-            var phoneNumberOfPhones = new string[4] { "099434553", "091324532", "099856432", "097421234" };
-            var ownerOfPhones = new string[4] { "BATMAN" , "J.Jonah Jameson", "Spiderman", "Nobody" };
-
-            for (int i = 0; i < 4; i++)
-            {
-                var dummyPhone = new MobilePhone(Guid.NewGuid(), descriptionsOfPhones[i], dateOfAquiringOfPhones[i], warrantyOfPhones[i], priceOfPhones[i], "apple", batteryOfPhones[i], phoneNumberOfPhones[i], ownerOfPhones[i]);
-                listOfPhones.Add(dummyPhone);
-            }
-
+            var tempPhone = new MobilePhone(Guid.NewGuid(), "Old", new DateTime(2011, 11, 1).Date, 0, 1000, MobilePhone.PhoneCompanies.Apple, true, "099434553", "Someone");
+            listOfPhones.Add(tempPhone);
+            tempPhone = new MobilePhone(Guid.NewGuid(), "A iphone X ( boss's phone)", new DateTime(2010, 10, 2).Date, 0, 1000, MobilePhone.PhoneCompanies.Samsung, true, "091324532", "Spiderman");
+            listOfPhones.Add(tempPhone);
+            tempPhone = new MobilePhone(Guid.NewGuid(), "Barely working", new DateTime(2014, 5, 1).Date, 0, 800, MobilePhone.PhoneCompanies.Sony, false, "099856432", "Jameson");
+            listOfPhones.Add(tempPhone);
+            tempPhone = new MobilePhone(Guid.NewGuid(), "Bad touchscreen", new DateTime(2000, 2, 2).Date, 0, 400, MobilePhone.PhoneCompanies.Samsung, false, "097421234", "BATMAN");
+            listOfPhones.Add(tempPhone);
             return listOfPhones;
         }
 
         static List<Computer> PreliminaryInputComputers()
         {
             var listOfComputers = new List<Computer>();
-
-            var descriptionsOfComputers = new string[4] { "Gaming computer", "For writing code", "A mac ( boss's laptop)", "New" };
-            var dateOfAquiringOfComputers = new DateTime[4]
-                {
-                new DateTime(2015, 11, 9),
-                new DateTime(2016, 10, 8),
-                new DateTime(2014, 4, 5),
-                new DateTime(2017, 2, 5)
-            };
-            var warrantyOfComputers = new int[4] { 24, 24, 32, 12 };
-            var priceOfComputers = new double[4] { 1000, 800, 200, 1000 };
-            var sellerOfComputers = new string[4] { "Dell", "HP", "Acer", "Apple" };
-            var batteryOfComputers = new bool[4] { true, false, true, false };
-            var operatingSystemOfComputers = new string[4] { "Windows", "Windows", "Linux", "iOS" };
-            var portableOfComputers = new bool[4] { true, true, false, false };
-
-            for (int i = 0; i < 4; i++)
-            {
-                var dummyComputer = new Computer(Guid.NewGuid(), descriptionsOfComputers[i], dateOfAquiringOfComputers[i], warrantyOfComputers[i], priceOfComputers[i], sellerOfComputers[i], batteryOfComputers[i], operatingSystemOfComputers[i], portableOfComputers[i]);
-                listOfComputers.Add(dummyComputer);
-            }
-
+            var tempComputer = new Computer(Guid.NewGuid(), "Gaming computer", new DateTime(2015, 11, 9).Date, 24, 1000, Computer.ComputerCompanies.Apple, true, Computer.OS.Linux, false);
+            listOfComputers.Add(tempComputer);
+            tempComputer = new Computer(Guid.NewGuid(), "New", new DateTime(2016, 10, 8).Date, 24, 800, Computer.ComputerCompanies.Dell, false, Computer.OS.Windows, true);
+            listOfComputers.Add(tempComputer);
+            tempComputer = new Computer(Guid.NewGuid(), "For writing code", new DateTime(2014, 4, 5).Date, 32, 200, Computer.ComputerCompanies.Apple, true, Computer.OS.Windows, false);
+            listOfComputers.Add(tempComputer);
+            tempComputer = new Computer(Guid.NewGuid(), "A mac ( boss's laptop)", new DateTime(2017, 2, 5).Date, 12, 1000, Computer.ComputerCompanies.Acer, false, Computer.OS.iOS, true);
+            listOfComputers.Add(tempComputer);
             return listOfComputers;
-        }
-
-        //creating enums for sellers
-        public enum ComputerCompanies
-        {
-            Dell = 1,
-            HP = 2,
-            Acer = 3,
-            Apple = 4
-        }
-
-        public enum PhoneCompanies
-        {
-            Samsung = 1,
-            Sony = 2,
-            Xiaomi = 3,
-            Apple = 4
-        }
-
-        public enum VehicleCompanies
-        {
-            Toyota = 1,
-            Honda = 2,
-            Ford = 3,
-            WolksVagen = 4
-        }
-
-        public enum OS
-        {
-            Android = 1,
-            Windows = 2,
-            iOS = 3,
-            Linux = 4
         }
     }
 }
